@@ -508,7 +508,7 @@ class Variables:
 
     def load(self):
         self.j = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
-        self.m = mywindow.is_float(self.main_window.ui.doubleSpinBox_9)
+        self.m = mywindow.is_int(self.main_window.ui.doubleSpinBox_9)
 
     def update(self):
         self.load()

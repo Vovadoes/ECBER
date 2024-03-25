@@ -2,6 +2,7 @@ from typing import Callable
 from typing import List, Any
 
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 
 from files.MainWindow import Ui_MainWindow
 from files.ResultWindow import Ui_Form
@@ -25,12 +26,16 @@ class Variables:
     def __init__(self, main_window):
         self.main_window: mywindow = main_window
         self.j = None
-        self.m = None
+        self.i = None
+        self.m1 = None
+        self.m2 = None
         self.load()
 
     def load(self):
         self.j = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
-        self.m = mywindow.is_int(self.main_window.ui.doubleSpinBox_9)
+        self.i = mywindow.is_float(self.main_window.ui.doubleSpinBox_11)
+        self.m1 = mywindow.is_float(self.main_window.ui.doubleSpinBox_9)
+        self.m2 = mywindow.is_float(self.main_window.ui.doubleSpinBox_10)
 
     def update(self):
         self.load()
@@ -49,7 +54,9 @@ class mywindow(QtWidgets.QMainWindow):
 
         if DEDUG:
             self.ui.doubleSpinBox_8.setValue(24)  # j
-            self.ui.doubleSpinBox_9.setValue(4)  # m
+            self.ui.doubleSpinBox_11.setValue(25)  # i
+            self.ui.doubleSpinBox_9.setValue(4)  # m1
+            self.ui.doubleSpinBox_10.setValue(12)  # m2
 
         change_size(self)
 
@@ -102,13 +109,13 @@ class mywindow(QtWidgets.QMainWindow):
         # self.ui.pushButton_8.clicked.connect(self.table_loader1.open_table)
         # self.ui.pushButton_3.clicked.connect(self.table_loader2.open_table)
 
-        # add_def_pushButton = lambda : self.calculation.simple_bid()
-        # add_def_pushButton_2 = lambda : self.calculation.difficult_bet()
-        # self.ui.pushButton.clicked.connect(lambda : self.calculate(add_def_pushButton))
-        # self.ui.pushButton_2.clicked.connect(lambda : self.calculate(add_def_pushButton_2))
-
-        add_def_pushButton = lambda: None
+        add_def_pushButton = lambda: self.calculation.base()
+        add_def_pushButton_2 = lambda: self.calculation.iffect()
         self.ui.pushButton.clicked.connect(lambda: self.calculate(add_def_pushButton))
+        self.ui.pushButton_2.clicked.connect(lambda: self.calculate(add_def_pushButton_2))
+
+        # add_def_pushButton = lambda: None
+        # self.ui.pushButton.clicked.connect(lambda: self.calculate(add_def_pushButton))
 
     def calculate(self, fun, *args, **kwargs):
         self.variables.update()
@@ -117,7 +124,9 @@ class mywindow(QtWidgets.QMainWindow):
         if condition:
             self.calculation = Calculation(
                 j=self.variables.j,
-                m=self.variables.m,
+                i=self.variables.i,
+                m1=self.variables.m1,
+                m2=self.variables.m2,
             )
             fun(*args, **kwargs)
             window = Finish(
@@ -168,8 +177,21 @@ class Finish(QtWidgets.QDialog):
         self.parent = parent
         self.ui.setupUi(self)
         change_size(self)
+        _translate = QtCore.QCoreApplication.translate
 
-        self.ui.doubleSpinBox_10.setValue(round(self.parent.calculation.i_ef, 2))
+        if self.parent.calculation.flag:
+            self.ui.label_39.setText("Эффективная годовая ставка:")
+            self.ui.label_41.setText(_translate(
+                "Form",
+                "<html><head/><body><p>i<span style=\" vertical-align:sub;\">эф</span></p></body></html>")
+            )
+
+        else:
+            self.ui.label_39.setText("Номинальная ставка эквивалентная эффективной ставке:")
+            self.ui.label_41.setText(_translate("Form",
+                                             "<html><head/><body><p>j</p></body></html>"))
+
+        self.ui.doubleSpinBox_10.setValue(round(self.parent.calculation.result, 2))
 
         # self.ui.textEdit.setText(
         #     f"Приближенное значение средней урожайности равно x(среднее) = {str(round(self.parent.calculation.x_cp_v, 2)).replace('.', ',')} ц. Следовательно, оценка средней урожайности сахарной свеклы на всем массиве равна {str(round(self.parent.calculation.x_cp_v)).replace('.', ',')} ц со средней квадратической ошибкой {str(round(self.parent.calculation.S_xcp, 2)).replace('.', ',')} ц. Оценка среднего квадратического отклонения урожайности на всем массиве равна {str(round(self.parent.calculation.s, 2)).replace('.', ',')} ц."

@@ -35,11 +35,13 @@ def f1(s):
         print(i)
 
 
-s = 'j, m'
+s = 'j, i, m1, m2'
 f1(s)
 #
-lst = '''self.n = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
-        self.k = mywindow.is_int(self.main_window.ui.doubleSpinBox_9)'''\
+lst = '''self.j = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
+        self.i = mywindow.is_float(self.main_window.ui.doubleSpinBox_11)
+        self.m1 = mywindow.is_float(self.main_window.ui.doubleSpinBox_9)
+        self.m2 = mywindow.is_float(self.main_window.ui.doubleSpinBox_10)'''\
     .replace('        ', '').replace('(', ')').split('\n')
 
 for i in lst:

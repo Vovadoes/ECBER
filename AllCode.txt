@@ -174,16 +174,33 @@ def myround(x: float, lst: list):
 
 
 class Calculation:
-    def __init__(self, j, m):
-        self.i_ef = (pow(1 + (j / (100 * m)), m) - 1) * 100
-        pass
+    def __init__(self, i, j, m1, m2):
+        self.i = i
+        self.j = j
+        self.m1 = m1
+        self.m2 = m2
+        self.result = None
+        self.flag = None
+
+    def iffect(self):
+        self.result = (pow(1 + (self.j / (100 * self.m1)), self.m1) - 1) * 100
+        self.flag = True
+
+    def base(self):
+        self.result = self.m2 * (pow(1 + self.i / 100, 1 / self.m2) - 1) * 100
+        self.flag = False
 
 
 if __name__ == "__main__":
     j = 24
-    m = 4
-    calculation = Calculation(j, m )
-    print(calculation.i_ef)
+    m1 = 4
+    i = 25
+    m2 = 12
+    calculation = Calculation(i, j, m1, m2)
+    calculation.iffect()
+    print(calculation.result)
+    calculation.base()
+    print(calculation.result)
 
 
 ----- Monitor.py -----
@@ -467,10 +484,12 @@ def f1(s):
         print(i)
 
 
-s = 'j, m'
+s = 'j, i, m1, m2'
 f1(s)
-lst = '''self.n = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
-        self.k = mywindow.is_int(self.main_window.ui.doubleSpinBox_9)'''\
+lst = '''self.j = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
+        self.i = mywindow.is_float(self.main_window.ui.doubleSpinBox_11)
+        self.m1 = mywindow.is_float(self.main_window.ui.doubleSpinBox_9)
+        self.m2 = mywindow.is_float(self.main_window.ui.doubleSpinBox_10)'''\
     .replace('        ', '').replace('(', ')').split('\n')
 
 for i in lst:
@@ -482,6 +501,7 @@ from typing import Callable
 from typing import List, Any
 
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 
 from files.MainWindow import Ui_MainWindow
 from files.ResultWindow import Ui_Form
@@ -503,12 +523,16 @@ class Variables:
     def __init__(self, main_window):
         self.main_window: mywindow = main_window
         self.j = None
-        self.m = None
+        self.i = None
+        self.m1 = None
+        self.m2 = None
         self.load()
 
     def load(self):
         self.j = mywindow.is_float(self.main_window.ui.doubleSpinBox_8)
-        self.m = mywindow.is_int(self.main_window.ui.doubleSpinBox_9)
+        self.i = mywindow.is_float(self.main_window.ui.doubleSpinBox_11)
+        self.m1 = mywindow.is_float(self.main_window.ui.doubleSpinBox_9)
+        self.m2 = mywindow.is_float(self.main_window.ui.doubleSpinBox_10)
 
     def update(self):
         self.load()
@@ -538,9 +562,11 @@ class mywindow(QtWidgets.QMainWindow):
             pass
 
 
-
-        add_def_pushButton = lambda: None
+        add_def_pushButton = lambda: self.calculation.base()
+        add_def_pushButton_2 = lambda: self.calculation.iffect()
         self.ui.pushButton.clicked.connect(lambda: self.calculate(add_def_pushButton))
+        self.ui.pushButton_2.clicked.connect(lambda: self.calculate(add_def_pushButton_2))
+
 
     def calculate(self, fun, *args, **kwargs):
         self.variables.update()
@@ -548,7 +574,9 @@ class mywindow(QtWidgets.QMainWindow):
         if condition:
             self.calculation = Calculation(
                 j=self.variables.j,
-                m=self.variables.m,
+                i=self.variables.i,
+                m1=self.variables.m1,
+                m2=self.variables.m2,
             )
             fun(*args, **kwargs)
             window = Finish(
@@ -594,8 +622,21 @@ class Finish(QtWidgets.QDialog):
         self.parent = parent
         self.ui.setupUi(self)
         change_size(self)
+        _translate = QtCore.QCoreApplication.translate
 
-        self.ui.doubleSpinBox_10.setValue(round(self.parent.calculation.i_ef, 2))
+        if self.parent.calculation.flag:
+            self.ui.label_39.setText("Эффективная годовая ставка:")
+            self.ui.label_41.setText(_translate(
+                "Form",
+                "<html><head/><body><p>i<span style=\" vertical-align:sub;\">эф</span></p></body></html>")
+            )
+
+        else:
+            self.ui.label_39.setText("Номинальная ставка эквивалентная эффективной ставке:")
+            self.ui.label_41.setText(_translate("Form",
+                                             "<html><head/><body><p>j</p></body></html>"))
+
+        self.ui.doubleSpinBox_10.setValue(round(self.parent.calculation.result, 2))
 
 
 
@@ -633,13 +674,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 218)
-        MainWindow.setMinimumSize(QtCore.QSize(800, 218))
-        MainWindow.setMaximumSize(QtCore.QSize(800, 220))
+        MainWindow.resize(800, 400)
+        MainWindow.setMinimumSize(QtCore.QSize(800, 400))
+        MainWindow.setMaximumSize(QtCore.QSize(800, 400))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout_3.setObjectName("gridLayout_3")
         self.label_11 = QtWidgets.QLabel(self.centralwidget)
         self.label_11.setMinimumSize(QtCore.QSize(400, 35))
         font = QtGui.QFont()
@@ -649,7 +690,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
-        self.gridLayout_2.addWidget(self.label_11, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_11, 0, 0, 1, 1)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
         self.gridLayout_11 = QtWidgets.QGridLayout()
@@ -766,20 +807,148 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.gridLayout_10, 0, 0, 1, 1)
         self.gridLayout.setRowStretch(0, 1)
         self.gridLayout.setRowStretch(1, 1)
-        self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout, 1, 0, 1, 1)
+        self.label_12 = QtWidgets.QLabel(self.centralwidget)
+        self.label_12.setMinimumSize(QtCore.QSize(400, 35))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_12.setFont(font)
+        self.label_12.setObjectName("label_12")
+        self.gridLayout_3.addWidget(self.label_12, 2, 0, 1, 1)
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.gridLayout_12 = QtWidgets.QGridLayout()
+        self.gridLayout_12.setObjectName("gridLayout_12")
+        self.label_49 = QtWidgets.QLabel(self.centralwidget)
+        self.label_49.setMinimumSize(QtCore.QSize(400, 35))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_49.setFont(font)
+        self.label_49.setObjectName("label_49")
+        self.gridLayout_12.addWidget(self.label_49, 0, 0, 1, 1)
+        self.label_50 = QtWidgets.QLabel(self.centralwidget)
+        self.label_50.setMinimumSize(QtCore.QSize(60, 0))
+        self.label_50.setMaximumSize(QtCore.QSize(60, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        font.setItalic(True)
+        self.label_50.setFont(font)
+        self.label_50.setObjectName("label_50")
+        self.gridLayout_12.addWidget(self.label_50, 0, 1, 1, 1)
+        self.label_51 = QtWidgets.QLabel(self.centralwidget)
+        self.label_51.setMinimumSize(QtCore.QSize(20, 0))
+        self.label_51.setMaximumSize(QtCore.QSize(20, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_51.setFont(font)
+        self.label_51.setObjectName("label_51")
+        self.gridLayout_12.addWidget(self.label_51, 0, 2, 1, 1)
+        self.doubleSpinBox_10 = QtWidgets.QDoubleSpinBox(self.centralwidget)
+        self.doubleSpinBox_10.setMinimumSize(QtCore.QSize(214, 25))
+        self.doubleSpinBox_10.setMaximumSize(QtCore.QSize(16777215, 220))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.doubleSpinBox_10.setFont(font)
+        self.doubleSpinBox_10.setDecimals(0)
+        self.doubleSpinBox_10.setMinimum(-16777215.0)
+        self.doubleSpinBox_10.setMaximum(16777215.0)
+        self.doubleSpinBox_10.setSingleStep(1.0)
+        self.doubleSpinBox_10.setObjectName("doubleSpinBox_10")
+        self.gridLayout_12.addWidget(self.doubleSpinBox_10, 0, 3, 1, 1)
+        self.label_52 = QtWidgets.QLabel(self.centralwidget)
+        self.label_52.setMinimumSize(QtCore.QSize(35, 0))
+        self.label_52.setMaximumSize(QtCore.QSize(35, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_52.setFont(font)
+        self.label_52.setObjectName("label_52")
+        self.gridLayout_12.addWidget(self.label_52, 0, 4, 1, 1)
+        self.label_53 = QtWidgets.QLabel(self.centralwidget)
+        self.label_53.setText("")
+        self.label_53.setObjectName("label_53")
+        self.gridLayout_12.addWidget(self.label_53, 0, 5, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout_12, 1, 0, 1, 1)
+        self.gridLayout_13 = QtWidgets.QGridLayout()
+        self.gridLayout_13.setObjectName("gridLayout_13")
+        self.label_54 = QtWidgets.QLabel(self.centralwidget)
+        self.label_54.setMinimumSize(QtCore.QSize(400, 35))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_54.setFont(font)
+        self.label_54.setObjectName("label_54")
+        self.gridLayout_13.addWidget(self.label_54, 0, 0, 1, 1)
+        self.label_55 = QtWidgets.QLabel(self.centralwidget)
+        self.label_55.setMinimumSize(QtCore.QSize(60, 0))
+        self.label_55.setMaximumSize(QtCore.QSize(60, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        font.setItalic(True)
+        self.label_55.setFont(font)
+        self.label_55.setObjectName("label_55")
+        self.gridLayout_13.addWidget(self.label_55, 0, 1, 1, 1)
+        self.label_56 = QtWidgets.QLabel(self.centralwidget)
+        self.label_56.setMinimumSize(QtCore.QSize(20, 0))
+        self.label_56.setMaximumSize(QtCore.QSize(20, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_56.setFont(font)
+        self.label_56.setObjectName("label_56")
+        self.gridLayout_13.addWidget(self.label_56, 0, 2, 1, 1)
+        self.doubleSpinBox_11 = QtWidgets.QDoubleSpinBox(self.centralwidget)
+        self.doubleSpinBox_11.setMinimumSize(QtCore.QSize(214, 25))
+        self.doubleSpinBox_11.setMaximumSize(QtCore.QSize(16777215, 220))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.doubleSpinBox_11.setFont(font)
+        self.doubleSpinBox_11.setDecimals(2)
+        self.doubleSpinBox_11.setMinimum(-16777215.0)
+        self.doubleSpinBox_11.setMaximum(16777215.0)
+        self.doubleSpinBox_11.setSingleStep(0.01)
+        self.doubleSpinBox_11.setObjectName("doubleSpinBox_11")
+        self.gridLayout_13.addWidget(self.doubleSpinBox_11, 0, 3, 1, 1)
+        self.label_57 = QtWidgets.QLabel(self.centralwidget)
+        self.label_57.setMinimumSize(QtCore.QSize(35, 0))
+        self.label_57.setMaximumSize(QtCore.QSize(35, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_57.setFont(font)
+        self.label_57.setObjectName("label_57")
+        self.gridLayout_13.addWidget(self.label_57, 0, 4, 1, 1)
+        self.label_58 = QtWidgets.QLabel(self.centralwidget)
+        self.label_58.setText("")
+        self.label_58.setObjectName("label_58")
+        self.gridLayout_13.addWidget(self.label_58, 0, 5, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout_13, 0, 0, 1, 1)
+        self.gridLayout_2.setRowStretch(0, 1)
+        self.gridLayout_2.setRowStretch(1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 3, 0, 1, 1)
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.gridLayout_3.addWidget(self.pushButton_2, 4, 0, 1, 1)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(14)
         self.pushButton.setFont(font)
         self.pushButton.setObjectName("pushButton")
-        self.gridLayout_2.addWidget(self.pushButton, 2, 0, 1, 1)
-        self.gridLayout_2.setRowMinimumHeight(0, 1)
-        self.gridLayout_2.setRowMinimumHeight(1, 2)
-        self.gridLayout_2.setRowMinimumHeight(2, 1)
-        self.gridLayout_2.setRowStretch(0, 1)
-        self.gridLayout_2.setRowStretch(1, 4)
-        self.gridLayout_2.setRowStretch(2, 1)
+        self.gridLayout_3.addWidget(self.pushButton, 5, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -791,7 +960,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Установление соответствия между эффективной ставкой"))
-        self.label_11.setText(_translate("MainWindow", "<html><head/><body><p>Установление соответствия между эффективной ставкой</p></body></html>"))
+        self.label_11.setText(_translate("MainWindow", "<html><head/><body><p>1. Расчет эффективной ставки для номинальной ставки</p></body></html>"))
         self.label_40.setText(_translate("MainWindow", "<html><head/><body><p>Введите количество начислений в году:</p></body></html>"))
         self.label_45.setText(_translate("MainWindow", "<html><head/><body><p>m</p></body></html>"))
         self.label_46.setText(_translate("MainWindow", "<html><head/><body><p>=</p></body></html>"))
@@ -800,7 +969,17 @@ class Ui_MainWindow(object):
         self.label_41.setText(_translate("MainWindow", "<html><head/><body><p>j</p></body></html>"))
         self.label_42.setText(_translate("MainWindow", "<html><head/><body><p>=</p></body></html>"))
         self.label_43.setText(_translate("MainWindow", "<html><head/><body><p>%</p></body></html>"))
-        self.pushButton.setText(_translate("MainWindow", "Рассчитать"))
+        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p>2. Расчет номинальной ставки, эквивалентной эффективной ставке</p></body></html>"))
+        self.label_49.setText(_translate("MainWindow", "<html><head/><body><p>Введите количество начислений в году:</p></body></html>"))
+        self.label_50.setText(_translate("MainWindow", "<html><head/><body><p>m</p></body></html>"))
+        self.label_51.setText(_translate("MainWindow", "<html><head/><body><p>=</p></body></html>"))
+        self.label_52.setText(_translate("MainWindow", "<html><head/><body><p/></body></html>"))
+        self.label_54.setText(_translate("MainWindow", "<html><head/><body><p>Введите эффективную ставку:</p></body></html>"))
+        self.label_55.setText(_translate("MainWindow", "<html><head/><body><p>i<span style=\" vertical-align:sub;\">эф</span></p></body></html>"))
+        self.label_56.setText(_translate("MainWindow", "<html><head/><body><p>=</p></body></html>"))
+        self.label_57.setText(_translate("MainWindow", "<html><head/><body><p>%</p></body></html>"))
+        self.pushButton_2.setText(_translate("MainWindow", "Номинальная ставка, эквивалентная эффективной ставки "))
+        self.pushButton.setText(_translate("MainWindow", "Эффективная ставка для номинальной ставки"))
 
 
 ----- files/ResultWindow.py -----
@@ -813,12 +992,23 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(700, 100)
-        Form.setMinimumSize(QtCore.QSize(700, 100))
-        Form.setMaximumSize(QtCore.QSize(700, 100))
+        Form.resize(650, 150)
+        Form.setMinimumSize(QtCore.QSize(650, 150))
+        Form.setMaximumSize(QtCore.QSize(650, 150))
         Form.setStyleSheet("")
-        self.gridLayout_2 = QtWidgets.QGridLayout(Form)
+        self.gridLayout_3 = QtWidgets.QGridLayout(Form)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
+        self.label_39 = QtWidgets.QLabel(Form)
+        self.label_39.setMinimumSize(QtCore.QSize(300, 0))
+        self.label_39.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_39.setFont(font)
+        self.label_39.setObjectName("label_39")
+        self.gridLayout_2.addWidget(self.label_39, 0, 0, 1, 1)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
         self.gridLayout_18 = QtWidgets.QGridLayout()
@@ -838,16 +1028,7 @@ class Ui_Form(object):
         self.doubleSpinBox_10.setSingleStep(0.001)
         self.doubleSpinBox_10.setProperty("value", 0.0)
         self.doubleSpinBox_10.setObjectName("doubleSpinBox_10")
-        self.gridLayout_18.addWidget(self.doubleSpinBox_10, 0, 3, 1, 1)
-        self.label_38 = QtWidgets.QLabel(Form)
-        self.label_38.setMinimumSize(QtCore.QSize(20, 0))
-        self.label_38.setMaximumSize(QtCore.QSize(20, 16777215))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(14)
-        self.label_38.setFont(font)
-        self.label_38.setObjectName("label_38")
-        self.gridLayout_18.addWidget(self.label_38, 0, 2, 1, 1)
+        self.gridLayout_18.addWidget(self.doubleSpinBox_10, 0, 2, 1, 1)
         self.label_40 = QtWidgets.QLabel(Form)
         self.label_40.setMinimumSize(QtCore.QSize(60, 0))
         self.label_40.setMaximumSize(QtCore.QSize(16777215, 16777215))
@@ -856,36 +1037,39 @@ class Ui_Form(object):
         font.setPointSize(14)
         self.label_40.setFont(font)
         self.label_40.setObjectName("label_40")
-        self.gridLayout_18.addWidget(self.label_40, 0, 4, 1, 1)
-        self.label_39 = QtWidgets.QLabel(Form)
-        self.label_39.setMinimumSize(QtCore.QSize(300, 0))
-        self.label_39.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(14)
-        self.label_39.setFont(font)
-        self.label_39.setObjectName("label_39")
-        self.gridLayout_18.addWidget(self.label_39, 0, 0, 1, 1)
+        self.gridLayout_18.addWidget(self.label_40, 0, 3, 1, 1)
         self.label_41 = QtWidgets.QLabel(Form)
         self.label_41.setMinimumSize(QtCore.QSize(35, 0))
-        self.label_41.setMaximumSize(QtCore.QSize(35, 16777215))
+        self.label_41.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(14)
         font.setItalic(True)
         self.label_41.setFont(font)
         self.label_41.setObjectName("label_41")
-        self.gridLayout_18.addWidget(self.label_41, 0, 1, 1, 1)
+        self.gridLayout_18.addWidget(self.label_41, 0, 0, 1, 1)
+        self.label_38 = QtWidgets.QLabel(Form)
+        self.label_38.setMinimumSize(QtCore.QSize(20, 0))
+        self.label_38.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        self.label_38.setFont(font)
+        self.label_38.setObjectName("label_38")
+        self.gridLayout_18.addWidget(self.label_38, 0, 1, 1, 1)
+        self.gridLayout_18.setColumnStretch(3, 1)
         self.gridLayout.addLayout(self.gridLayout_18, 0, 0, 1, 1)
-        self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 2)
+        self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
         self.pushButton = QtWidgets.QPushButton(Form)
+        self.pushButton.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(14)
         self.pushButton.setFont(font)
         self.pushButton.setStyleSheet("")
         self.pushButton.setObjectName("pushButton")
-        self.gridLayout_2.addWidget(self.pushButton, 1, 0, 1, 2)
+        self.gridLayout_3.addWidget(self.pushButton, 1, 0, 1, 1)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -893,10 +1077,10 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Установление соответствия между эффективной ставкой"))
-        self.label_38.setText(_translate("Form", "="))
+        self.label_39.setText(_translate("Form", "<html><head/><body><p>Номинальная ставка эквивалентная эффективной ставке:</p></body></html>"))
         self.label_40.setText(_translate("Form", "%"))
-        self.label_39.setText(_translate("Form", "<html><head/><body><p>Эффективная годовая ставка:</p></body></html>"))
         self.label_41.setText(_translate("Form", "<html><head/><body><p>i<span style=\" vertical-align:sub;\">эф</span></p></body></html>"))
+        self.label_38.setText(_translate("Form", "="))
         self.pushButton.setText(_translate("Form", "ОК"))
 
 

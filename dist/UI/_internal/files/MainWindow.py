@@ -318,5 +318,5 @@ class Ui_MainWindow(object):
         self.label_55.setText(_translate("MainWindow", "<html><head/><body><p>i<span style=\" vertical-align:sub;\">эф</span></p></body></html>"))
         self.label_56.setText(_translate("MainWindow", "<html><head/><body><p>=</p></body></html>"))
         self.label_57.setText(_translate("MainWindow", "<html><head/><body><p>%</p></body></html>"))
-        self.pushButton_2.setText(_translate("MainWindow", "Номинальная ставка, эквивалентная эффективной ставки "))
+        self.pushButton_2.setText(_translate("MainWindow", "Номинальная ставка, эквивалентная эффективной ставке"))
         self.pushButton.setText(_translate("MainWindow", "Эффективная ставка для номинальной ставки"))

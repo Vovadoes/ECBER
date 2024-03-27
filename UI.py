@@ -187,7 +187,7 @@ class Finish(QtWidgets.QDialog):
             )
 
         else:
-            self.ui.label_39.setText("Номинальная ставка эквивалентная эффективной ставке:")
+            self.ui.label_39.setText("Номинальная ставка, эквивалентная эффективной ставке:")
             self.ui.label_41.setText(_translate("Form",
                                              "<html><head/><body><p>j</p></body></html>"))
 

@@ -646,7 +646,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Номинальная ставка, эквивалентная эффективной ставки </string>
+       <string>Номинальная ставка, эквивалентная эффективной ставке</string>
       </property>
      </widget>
     </item>
